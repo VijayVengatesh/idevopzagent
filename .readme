@@ -1,0 +1,27 @@
+## folder structure
+
+myapp/
+├── cmd/
+│ └── myapp/ # Entry point (main.go)
+│ └── main.go
+├── internal/ # Private application code
+│ ├── config/ # Configuration loaders
+│ ├── core/ # Core business logic
+│ ├── service/ # Application services
+│ ├── platform/ # Platform (OS-specific) code
+│ │ ├── windows/
+│ │ ├── linux/
+│ │ └── darwin/ # macOS
+│ └── utils/ # Utility functions
+├── pkg/ # Public library code for other services (if needed)
+│ └── logger/
+├── api/ # API definitions or protobufs
+│ ├── rest/ # REST API handlers
+│ └── grpc/ # gRPC services
+├── scripts/ # Build, install, run scripts
+├── configs/ # Config files for different envs
+├── web/ # Frontend (React, Angular, etc) if any
+├── build/ # Docker, CI/CD, packaging-related
+├── test/ # Test cases and test data
+├── go.mod
+└── go.sum
