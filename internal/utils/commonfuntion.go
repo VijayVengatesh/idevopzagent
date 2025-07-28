@@ -6,13 +6,16 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
 func GetNumCPU() int {
 	return runtime.NumCPU()
 }
-
+func GetOS() string {
+	return runtime.GOOS
+}
 func GetHostName() (string, error) {
 	return os.Hostname()
 }
@@ -39,4 +42,12 @@ func GetDiskUsage(path string) (usedPercent float64, total uint64, used uint64, 
 		return 0, 0, 0, err
 	}
 	return diskStat.UsedPercent, diskStat.Total, diskStat.Used, nil
+}
+
+func GetUptime() (uint64, error) {
+	info, err := host.Info()
+	if err != nil {
+		return 0, err
+	}
+	return info.Uptime, nil
 }
