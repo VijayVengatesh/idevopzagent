@@ -10,6 +10,6 @@ type ProcessInfo struct {
 	MemoryPercent float32 `json:"memory_percent"`
 	ThreadCount   int32   `json:"thread_count"`
 	HandleCount   uint32  `json:"handle_count"`
-	Priority      string  `json:"priority"`
+	Priority      any     `json:"priority"`
 	Timestamp     int64   `json:"timestamp"`
 }

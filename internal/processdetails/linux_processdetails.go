@@ -51,7 +51,7 @@ func (l LinuxCollector) ListAllProcesses(userID string) ([]*models.ProcessInfo, 
 			MemoryPercent: memPct,
 			ThreadCount:   threads,
 			HandleCount:   handles,
-			Priority:      string(priority),
+			Priority:      int(priority),
 			Timestamp:     time.Now().Unix(),
 		}
 		results = append(results, processInfo)
