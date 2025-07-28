@@ -4,10 +4,14 @@
 package processdetails
 
 import (
+	"bufio"
 	"fmt"
 	"iDevopzAgent/internal/utils"
 	"iDevopzAgent/models"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -63,9 +67,10 @@ func (l LinuxCollector) ListAllProcesses(userID string) ([]*models.ProcessInfo, 
 //top 5 cpu process
 
 func (l LinuxCollector) ListTop5CpuProcess(userID string) ([]*models.Process, error) {
-	topCpuProcesses, err := utils.GetTopProcessesByCPU(5)
+	cmd := exec.Command("bash", "-c", "ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6")
+	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error running ps command while top5 cpu process: %w", err)
 	}
 
 	hostname, err := os.Hostname()
@@ -73,24 +78,52 @@ func (l LinuxCollector) ListTop5CpuProcess(userID string) ([]*models.Process, er
 		return nil, err
 	}
 
-	var result []*models.Process
-	for _, proc := range topCpuProcesses {
-		result = append(result, &models.Process{
+	scanner := bufio.NewScanner(strings.NewReader(string(output)))
+	var processes []*models.Process
+	lineNum := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		lineNum++
+		if lineNum == 1 {
+			continue // skip header
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) < 3 {
+			continue
+		}
+
+		pid := fields[0]
+		command := fields[1]
+		cpuStr := fields[2]
+
+		cpuPercent, err := strconv.ParseFloat(cpuStr, 64)
+		if err != nil {
+			cpuPercent = 0.0
+		}
+
+		processes = append(processes, &models.Process{
 			UserID:   userID,
 			Hostname: hostname,
-			PID:      fmt.Sprintf("%d", proc.PID),
-			Usage:    proc.CPUPercent,
-			Command:  proc.Name,
+			PID:      pid,
+			Usage:    cpuPercent,
+			Command:  command,
 		})
 	}
 
-	return result, nil
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return processes, nil
 }
 
 func (l LinuxCollector) ListTop5MemoryProcess(userID string) ([]*models.Process, error) {
-	topCpuProcesses, err := utils.GetTopProcessesByMemory(5)
+	cmd := exec.Command("bash", "-c", "ps -eo pid,comm,%mem --sort=-%mem | head -n 6")
+	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error running ps command while top5 mem process : %w", err)
 	}
 
 	hostname, err := os.Hostname()
@@ -98,18 +131,45 @@ func (l LinuxCollector) ListTop5MemoryProcess(userID string) ([]*models.Process,
 		return nil, err
 	}
 
-	var result []*models.Process
-	for _, proc := range topCpuProcesses {
-		result = append(result, &models.Process{
+	scanner := bufio.NewScanner(strings.NewReader(string(output)))
+	var processes []*models.Process
+	lineNum := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		lineNum++
+		if lineNum == 1 {
+			continue // skip header
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) < 3 {
+			continue
+		}
+
+		pid := fields[0]
+		command := fields[1]
+		cpuStr := fields[2]
+
+		cpuPercent, err := strconv.ParseFloat(cpuStr, 64)
+		if err != nil {
+			cpuPercent = 0.0
+		}
+
+		processes = append(processes, &models.Process{
 			UserID:   userID,
 			Hostname: hostname,
-			PID:      fmt.Sprintf("%d", proc.PID),
-			Usage:    float64(proc.MemPercent),
-			Command:  proc.Name,
+			PID:      pid,
+			Usage:    cpuPercent,
+			Command:  command,
 		})
 	}
 
-	return result, nil
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return processes, nil
 }
 
 func GetProcessCollector() Collector {
