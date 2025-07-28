@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"iDevopzAgent/configs"
+	"iDevopzAgent/internal/healthreport"
 	"iDevopzAgent/internal/metrics"
 	"iDevopzAgent/internal/utilization"
 )
@@ -40,6 +41,16 @@ func main() {
 		fmt.Println("error collecting disk utilization:", err)
 	} else {
 		fmt.Println("disk utilzation", diskUtil)
+	}
+
+	h := healthreport.GetHealthReportCollector()
+
+	helthReportUtil, err := h.GenerateHealthReport(userID)
+
+	if err != nil {
+		fmt.Println("error collecting of healthReport", err)
+	} else {
+		fmt.Println("healthReport", helthReportUtil)
 	}
 
 }
