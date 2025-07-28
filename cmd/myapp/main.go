@@ -9,6 +9,7 @@ import (
 	"iDevopzAgent/internal/metrics"
 	"iDevopzAgent/internal/processdetails"
 	"iDevopzAgent/internal/utilization"
+	"iDevopzAgent/internal/utils"
 )
 
 func main() {
@@ -66,7 +67,14 @@ func main() {
 	if err != nil {
 		fmt.Println("Error marshaling processes:", err)
 	} else {
-		fmt.Println("process details", string(data))
+		fmt.Println("process details", string(data), len(p))
+	}
+
+	count, err := utils.GetProcessCount()
+	if err != nil {
+		fmt.Println("Error get Process count Error ", err)
+	} else {
+		fmt.Println("Process count ", count)
 	}
 
 }
