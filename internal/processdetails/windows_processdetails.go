@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"iDevopzAgent/internal/utils"
 	"iDevopzAgent/models"
-	"math"
 	"os"
 	"runtime"
 	"time"
@@ -117,7 +116,7 @@ func (w WindowsCollector) ListTop5CpuProcess(userID string) ([]*models.Process, 
 			UserID:   userID,
 			Hostname: hostname,
 			PID:      fmt.Sprintf("%d", proc.PID),
-			Usage:    math.Round(proc.CPUPercent*100) / 100,
+			Usage:    proc.CPUPercent,
 			Command:  proc.Name,
 		})
 	}
@@ -142,7 +141,7 @@ func (w WindowsCollector) ListTop5MemoryProcess(userID string) ([]*models.Proces
 			UserID:   userID,
 			Hostname: hostname,
 			PID:      fmt.Sprintf("%d", proc.PID),
-			Usage:    proc.CPUPercent,
+			Usage:    float64(proc.MemPercent),
 			Command:  proc.Name,
 		})
 	}

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"iDevopzAgent/internal/utils"
 	"iDevopzAgent/models"
-	"math"
 	"os"
 	"time"
 )
@@ -105,7 +104,7 @@ func (l LinuxCollector) ListTop5MemoryProcess(userID string) ([]*models.Process,
 			UserID:   userID,
 			Hostname: hostname,
 			PID:      fmt.Sprintf("%d", proc.PID),
-			Usage:    math.Round(proc.CPUPercent*100) / 100,
+			Usage:    float64(proc.MemPercent),
 			Command:  proc.Name,
 		})
 	}
