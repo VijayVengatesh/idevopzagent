@@ -6,6 +6,7 @@ import (
 	"iDevopzAgent/configs"
 	"iDevopzAgent/internal/healthreport"
 	"iDevopzAgent/internal/metrics"
+	"iDevopzAgent/internal/processdetails"
 	"iDevopzAgent/internal/utilization"
 )
 
@@ -51,6 +52,16 @@ func main() {
 		fmt.Println("error collecting of healthReport", err)
 	} else {
 		fmt.Println("healthReport", helthReportUtil)
+	}
+
+	processUtil := processdetails.GetProcessCollector()
+
+	p, err := processUtil.ListAllProcesses(userID)
+
+	if err != nil {
+		fmt.Println("error collecting of process details", err)
+	} else {
+		fmt.Println("process details", p)
 	}
 
 }
