@@ -13,3 +13,11 @@ type ProcessInfo struct {
 	Priority      any     `json:"priority"`
 	Timestamp     int64   `json:"timestamp"`
 }
+
+type Process struct {
+	UserID   string  `json:"user_id"`
+	Hostname string  `json:"hostname"`
+	PID      string  `json:"pid"`
+	Usage    float64 `json:"usage"`
+	Command  string  `json:"command"`
+}

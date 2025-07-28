@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"iDevopzAgent/internal/utils"
 	"iDevopzAgent/models"
+	"math"
+	"os"
 	"runtime"
 	"time"
 
@@ -45,7 +47,7 @@ func getWindowsPriorityClass(priority int32) string {
 }
 
 // Get all process details
-func (l WindowsCollector) ListAllProcesses(userID string) ([]*models.ProcessInfo, error) {
+func (w WindowsCollector) ListAllProcesses(userID string) ([]*models.ProcessInfo, error) {
 	hostname, err := utils.GetHostName()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get host info: %w", err)
@@ -96,6 +98,57 @@ func (l WindowsCollector) ListAllProcesses(userID string) ([]*models.ProcessInfo
 	return results, nil
 }
 
+//top 5 cpu process
+
+func (w WindowsCollector) ListTop5CpuProcess(userID string) ([]*models.Process, error) {
+	topCpuProcesses, err := utils.GetTopProcessesByCPU(5)
+	if err != nil {
+		return nil, err
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*models.Process
+	for _, proc := range topCpuProcesses {
+		result = append(result, &models.Process{
+			UserID:   userID,
+			Hostname: hostname,
+			PID:      fmt.Sprintf("%d", proc.PID),
+			Usage:    math.Round(proc.CPUPercent*100) / 100,
+			Command:  proc.Name,
+		})
+	}
+
+	return result, nil
+}
+
+func (w WindowsCollector) ListTop5MemoryProcess(userID string) ([]*models.Process, error) {
+	topCpuProcesses, err := utils.GetTopProcessesByMemory(5)
+	if err != nil {
+		return nil, err
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*models.Process
+	for _, proc := range topCpuProcesses {
+		result = append(result, &models.Process{
+			UserID:   userID,
+			Hostname: hostname,
+			PID:      fmt.Sprintf("%d", proc.PID),
+			Usage:    proc.CPUPercent,
+			Command:  proc.Name,
+		})
+	}
+
+	return result, nil
+}
 func GetWindowsHandleCount(pid int32) (uint32, error) {
 	handle, err := windows.OpenProcess(windows.PROCESS_QUERY_INFORMATION, false, uint32(pid))
 	if err != nil {

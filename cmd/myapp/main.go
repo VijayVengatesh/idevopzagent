@@ -8,6 +8,7 @@ import (
 	"iDevopzAgent/internal/healthreport"
 	"iDevopzAgent/internal/metrics"
 	"iDevopzAgent/internal/processdetails"
+	"iDevopzAgent/internal/systeminfo"
 	"iDevopzAgent/internal/utilization"
 	"iDevopzAgent/internal/utils"
 )
@@ -69,12 +70,39 @@ func main() {
 	} else {
 		fmt.Println("process details", string(data), len(p))
 	}
+	top5Cpu, err := processUtil.ListTop5CpuProcess(userID)
+	if err != nil {
+		fmt.Println("Error getting top 5 processes by CPU:", err)
+	} else {
+		data, _ := json.MarshalIndent(top5Cpu, "", "  ")
+		fmt.Println("Top 5 processes by CPU:\n", string(data))
+	}
+
+	top5Mem, err := processUtil.ListTop5MemoryProcess(userID)
+	if err != nil {
+		fmt.Println("Error getting top 5 processes by Memory:", err)
+	} else {
+		data, _ := json.MarshalIndent(top5Mem, "", "  ")
+		fmt.Println("Top 5 processes by Memory:\n", string(data))
+	}
 
 	count, err := utils.GetProcessCount()
 	if err != nil {
 		fmt.Println("Error get Process count Error ", err)
 	} else {
 		fmt.Println("Process count ", count)
+	}
+
+	//sytemInfo
+
+	systemInfoCollector := systeminfo.GetSystemInfoCollector()
+
+	sys, err := systemInfoCollector.GetSystemSummary(userID)
+
+	if err != nil {
+		fmt.Println("error collecting of systemInfo", err)
+	} else {
+		fmt.Println("systemInfo", sys)
 	}
 
 }

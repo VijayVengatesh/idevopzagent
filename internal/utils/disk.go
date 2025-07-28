@@ -14,8 +14,8 @@ func GetDiskUsage(path string) (usedPercent float64, total uint64, used uint64, 
 }
 
 // GetDiskPartitions returns all mounted partitions
-func GetDiskPartitions() ([]disk.PartitionStat, error) {
-	return disk.Partitions(true)
+func GetDiskPartitions(all bool) ([]disk.PartitionStat, error) {
+	return disk.Partitions(all)
 }
 
 // GetIOCounters returns disk I/O stats for all devices

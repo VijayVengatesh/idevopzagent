@@ -1,11 +1,8 @@
 // internal/systeminfo/common.go
 package systeminfo
 
-type Info struct {
-	Hostname string
-	Platform string
-}
+import "iDevopzAgent/models"
 
-type Fetcher interface {
-	GetInfo() Info
+type Collector interface {
+	GetSystemSummary(userID string) (*models.Systeminfo, error)
 }

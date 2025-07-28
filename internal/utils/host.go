@@ -25,3 +25,8 @@ func GetUptime() (uint64, error) {
 	}
 	return info.Uptime, nil
 }
+
+// HostInfo returns detailed host/system information
+func HostInfo() (*host.InfoStat, error) {
+	return host.Info()
+}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"iDevopzAgent/internal/utils"
 	"iDevopzAgent/models"
+	"math"
 	"os"
 	"time"
 )
@@ -58,6 +59,58 @@ func (l LinuxCollector) ListAllProcesses(userID string) ([]*models.ProcessInfo, 
 	}
 
 	return results, nil
+}
+
+//top 5 cpu process
+
+func (l LinuxCollector) ListTop5CpuProcess(userID string) ([]*models.Process, error) {
+	topCpuProcesses, err := utils.GetTopProcessesByCPU(5)
+	if err != nil {
+		return nil, err
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*models.Process
+	for _, proc := range topCpuProcesses {
+		result = append(result, &models.Process{
+			UserID:   userID,
+			Hostname: hostname,
+			PID:      fmt.Sprintf("%d", proc.PID),
+			Usage:    proc.CPUPercent,
+			Command:  proc.Name,
+		})
+	}
+
+	return result, nil
+}
+
+func (l LinuxCollector) ListTop5MemoryProcess(userID string) ([]*models.Process, error) {
+	topCpuProcesses, err := utils.GetTopProcessesByMemory(5)
+	if err != nil {
+		return nil, err
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*models.Process
+	for _, proc := range topCpuProcesses {
+		result = append(result, &models.Process{
+			UserID:   userID,
+			Hostname: hostname,
+			PID:      fmt.Sprintf("%d", proc.PID),
+			Usage:    math.Round(proc.CPUPercent*100) / 100,
+			Command:  proc.Name,
+		})
+	}
+
+	return result, nil
 }
 
 func GetProcessCollector() Collector {
