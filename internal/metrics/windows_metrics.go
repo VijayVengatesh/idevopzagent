@@ -11,10 +11,6 @@ import (
 
 type WindowsCollector struct{}
 
-func (w WindowsCollector) Collect() Metrics {
-	return Metrics{CPUUsage: 22.2, MemoryUsage: 40.5}
-}
-
 func (w WindowsCollector) MetricsCollect(userID string) (*models.Metrics, error) {
 
 	const path = "C:\\"

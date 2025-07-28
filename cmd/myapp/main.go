@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"iDevopzAgent/configs"
 	"iDevopzAgent/internal/metrics"
-	"iDevopzAgent/internal/systeminfo"
+	"iDevopzAgent/internal/utilization"
 )
 
 func main() {
@@ -16,16 +16,30 @@ func main() {
 	}
 	// Metrics
 	collector := metrics.GetCollector()
-	m := collector.Collect()
 	y, err := collector.MetricsCollect(userID)
 	fmt.Println("collected metrics", y, err)
-	// System Info
-	fetcher := systeminfo.GetFetcher()
-	info := fetcher.GetInfo()
 
-	fmt.Println("System:", info.Platform)
-	fmt.Println("Hostname:", info.Hostname)
-	fmt.Println("CPU Usage:", m.CPUUsage)
-	fmt.Println("Memory Usage:", m.MemoryUsage)
+	u := utilization.UtilizationCollector()
+
+	cpuUtil, err := u.CpuUtilization(userID)
+	if err != nil {
+		fmt.Println("error collecting cpu utilization:", err)
+	} else {
+		fmt.Println("cpu utilization", cpuUtil)
+	}
+
+	memUtil, err := u.MemoryUtilization(userID)
+	if err != nil {
+		fmt.Println("error collecting memory utilization:", err)
+	} else {
+		fmt.Println("memory utilzation", memUtil)
+	}
+
+	diskUtil, err := u.DiskUtilization(userID)
+	if err != nil {
+		fmt.Println("error collecting disk utilization:", err)
+	} else {
+		fmt.Println("disk utilzation", diskUtil)
+	}
 
 }

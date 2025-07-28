@@ -1,0 +1,24 @@
+package utils
+
+import (
+	"github.com/shirou/gopsutil/v3/disk"
+)
+
+// GetDiskUsage returns used percent, total and used disk space of the given path
+func GetDiskUsage(path string) (usedPercent float64, total uint64, used uint64, err error) {
+	diskStat, err := disk.Usage(path)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	return diskStat.UsedPercent, diskStat.Total, diskStat.Used, nil
+}
+
+// GetDiskPartitions returns all mounted partitions
+func GetDiskPartitions() ([]disk.PartitionStat, error) {
+	return disk.Partitions(true)
+}
+
+// GetIOCounters returns disk I/O stats for all devices
+func GetIOCounters() (map[string]disk.IOCountersStat, error) {
+	return disk.IOCounters()
+}

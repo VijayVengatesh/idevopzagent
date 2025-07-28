@@ -11,9 +11,6 @@ import (
 
 type LinuxCollector struct{}
 
-func (l LinuxCollector) Collect() Metrics {
-	return Metrics{CPUUsage: 10.0, MemoryUsage: 30.0}
-}
 func (l LinuxCollector) MetricsCollect(userID string) (*models.Metrics, error) {
 
 	const path = "/"
