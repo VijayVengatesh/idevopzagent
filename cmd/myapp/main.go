@@ -2,6 +2,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"iDevopzAgent/configs"
 	"iDevopzAgent/internal/healthreport"
@@ -60,8 +61,12 @@ func main() {
 
 	if err != nil {
 		fmt.Println("error collecting of process details", err)
+	}
+	data, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshaling processes:", err)
 	} else {
-		fmt.Println("process details", p)
+		fmt.Println("process details", string(data))
 	}
 
 }
