@@ -14,7 +14,7 @@ func GetNumCPU() int {
 
 // GetCPUPercentage returns the total CPU usage as a percentage
 func GetCPUPercentage() (float64, error) {
-	percentages, err := cpu.Percent(0, false)
+	percentages, err := cpu.Percent(500*time.Millisecond, false)
 	if err != nil || len(percentages) == 0 {
 		return 0, err
 	}
