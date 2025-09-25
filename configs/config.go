@@ -112,3 +112,34 @@ func PromptAndSaveUserID() (string, string) {
 
 	return encryptedUserID, encryptedMachineID
 }
+
+func SaveUserID(userID string) error {
+	configPath := getConfigPath()
+	
+	// Get MachineID
+	machineID, err := machineid.ID()
+	if err != nil {
+		return fmt.Errorf("failed to get machine ID: %w", err)
+	}
+	
+	// Encrypt both
+	encryptedUserID, err := security.Encrypt(userID)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt UserID: %w", err)
+	}
+	
+	encryptedMachineID, err := security.Encrypt(machineID)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt MachineID: %w", err)
+	}
+	
+	// Save config
+	config := models.Config{
+		UserID:    encryptedUserID,
+		MachineID: encryptedMachineID,
+	}
+	data, _ := json.MarshalIndent(config, "", "  ")
+	
+	os.MkdirAll(filepath.Dir(configPath), 0700)
+	return os.WriteFile(configPath, data, 0600)
+}

@@ -1,0 +1,2 @@
+{"error":"websocket: bad handshake","level":"error","msg":"Failed to connect to Socket.IO, retrying in 5 seconds","time":"2025-09-25 15:08:03"}
+{"hostname":"ZLL-023","level":"info","machineID":"a8f12358-e160-470c-883c-240847f408a9","msg":"Startup details","os":"windows","time":"2025-09-25 15:08:03","userID":"idz-4576887783049095"}

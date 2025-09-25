@@ -32,3 +32,12 @@ $env:APP_ENV = "development"
 $env:APP_ENV = "production"
 $env:APP_ENV = "test"
 
+
+[Windows] Config directory: C:\Users\Username\AppData\Roaming\iDevopzAgent
+Full config file path: C:\Users\Username\AppData\Roaming\iDevopzAgent\config.json
+
+[macOS] Config directory: /Users/Username/Library/Application Support/iDevopzAgent
+Full config file path: /Users/Username/Library/Application Support/iDevopzAgent/config.json
+
+[Linux] Config directory: /home/username/.config/iDevopzAgent
+Full config file path: /home/username/.config/iDevopzAgent/config.json
