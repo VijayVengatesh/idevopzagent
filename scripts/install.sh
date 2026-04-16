@@ -80,6 +80,25 @@ if ! mkdir -p "$CONFIG_DIR" >/dev/null 2>&1; then
 fi
 LOG_FILE="$CONFIG_DIR/logs.txt"
 
+find_existing_config_dir() {
+    for dir in "$@"; do
+        [ -n "$dir" ] || continue
+        if [ -f "$dir/config.json" ]; then
+            echo "$dir"
+            return 0
+        fi
+    done
+    return 1
+}
+
+link_or_copy_file() {
+    src="$1"
+    dst="$2"
+    [ -f "$src" ] || return 0
+    [ -e "$dst" ] && return 0
+    ln -s "$src" "$dst" 2>/dev/null || cp "$src" "$dst" 2>/dev/null || true
+}
+
 if [ "$OS" = "Linux" ]; then
     if command -v systemctl >/dev/null 2>&1; then
         echo "Step 6: Enabling autostart (systemd)..."
@@ -131,6 +150,28 @@ fi
 
 pgrep -f idevopzagent > /dev/null
 if [ $? -eq 0 ]; then
+    ACTUAL_CONFIG_DIR="$(find_existing_config_dir \
+        "$CONFIG_DIR" \
+        "$FALLBACK_CONFIG_DIR" \
+        "/etc/idevopzagent" \
+        "$HOME/.config/idevopzagent" \
+        "$HOME/.local/share/idevopzagent" \
+        "$HOME/.local/state/idevopzagent" \
+        "$HOME/Library/Application Support/idevopzagent" \
+    )"
+
+    if [ -n "$ACTUAL_CONFIG_DIR" ] && [ "$ACTUAL_CONFIG_DIR" != "$CONFIG_DIR" ]; then
+        mkdir -p "$CONFIG_DIR" >/dev/null 2>&1 || true
+        link_or_copy_file "$ACTUAL_CONFIG_DIR/config.json" "$CONFIG_DIR/config.json"
+        link_or_copy_file "$ACTUAL_CONFIG_DIR/logs.txt" "$CONFIG_DIR/logs.txt"
+        echo "Warning: agent binary is writing config/logs in legacy path: $ACTUAL_CONFIG_DIR"
+        echo "         Canonical folder has been bridged: $CONFIG_DIR"
+    fi
+
+    if [ -n "$ACTUAL_CONFIG_DIR" ]; then
+        LOG_FILE="$ACTUAL_CONFIG_DIR/logs.txt"
+    fi
+
     echo "Installation complete. Agent is running in background."
     echo "Config: $CONFIG_DIR/config.json (encrypted device key + machine ID)"
     echo "Logs: $LOG_FILE"
