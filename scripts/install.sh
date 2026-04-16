@@ -65,7 +65,19 @@ echo "Step 5: Starting agent..."
 nohup /usr/local/bin/idevopzagent --device-key "$USER_ID" >/dev/null 2>&1 &
 sleep 2
 
-CONFIG_DIR="/etc/idevopzagent"
+if [ "$OS" = "Darwin" ]; then
+    PRIMARY_CONFIG_DIR="/Library/Application Support/idevopzagent"
+    FALLBACK_CONFIG_DIR="$HOME/Library/Application Support/idevopzagent"
+else
+    PRIMARY_CONFIG_DIR="/var/lib/idevopzagent"
+    FALLBACK_CONFIG_DIR="$HOME/.local/share/idevopzagent"
+fi
+
+CONFIG_DIR="$PRIMARY_CONFIG_DIR"
+if ! mkdir -p "$CONFIG_DIR" >/dev/null 2>&1; then
+    CONFIG_DIR="$FALLBACK_CONFIG_DIR"
+    mkdir -p "$CONFIG_DIR" >/dev/null 2>&1 || true
+fi
 LOG_FILE="$CONFIG_DIR/logs.txt"
 
 if [ "$OS" = "Linux" ]; then
