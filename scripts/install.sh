@@ -19,6 +19,73 @@ if [ -z "$USER_ID" ]; then
     exit 1
 fi
 
+get_machine_id() {
+    if [ -r "/etc/machine-id" ]; then
+        cat /etc/machine-id
+        return
+    fi
+    if command -v ioreg >/dev/null 2>&1; then
+        ioreg -rd1 -c IOPlatformExpertDevice | awk -F\" '/IOPlatformUUID/{print $4}'
+        return
+    fi
+    if command -v hostid >/dev/null 2>&1; then
+        hostid
+        return
+    fi
+    hostname
+}
+
+MACHINE_ID="$(get_machine_id | tr -d '\r\n' | xargs)"
+
+block_install() {
+    echo "Installation blocked: $1"
+    if [ -t 0 ] && [ -t 1 ]; then
+        echo "Press Esc to close, or use Ctrl+C."
+        while IFS= read -rsn1 key; do
+            if [ "$key" = $'\e' ]; then
+                break
+            fi
+        done
+    fi
+    exit 1
+}
+
+if [ -z "$MACHINE_ID" ]; then
+    block_install "Unable to determine machine ID. Installation blocked."
+fi
+
+API_BASE="${IDEVOPZ_API_BASE_URL:-http://10.1.1.218:6001}"
+LIMIT_STATUS_URL="${API_BASE%/}/api/agent/system/moniters/limit-status/${USER_ID}?machineId=${MACHINE_ID}"
+
+extract_message() {
+    sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1
+}
+
+echo "Preflight: Checking monitoring limit status..."
+LIMIT_BODY_FILE="$(mktemp)"
+LIMIT_ERR_FILE="$(mktemp)"
+HTTP_CODE="$(curl -sS -o "$LIMIT_BODY_FILE" -w "%{http_code}" --connect-timeout 10 --max-time 20 "$LIMIT_STATUS_URL" 2>"$LIMIT_ERR_FILE")"
+CURL_EXIT=$?
+
+if [ $CURL_EXIT -ne 0 ]; then
+    rm -f "$LIMIT_BODY_FILE" "$LIMIT_ERR_FILE"
+    block_install "Installation blocked. Please try again."
+fi
+
+RESPONSE_BODY="$(cat "$LIMIT_BODY_FILE")"
+rm -f "$LIMIT_BODY_FILE" "$LIMIT_ERR_FILE"
+
+if ! [[ "$HTTP_CODE" =~ ^[0-9]{3}$ ]] || [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+    ERROR_MESSAGE="$(printf '%s' "$RESPONSE_BODY" | extract_message)"
+    if [ -n "$ERROR_MESSAGE" ]; then
+        block_install "$ERROR_MESSAGE"
+    else
+        block_install "Installation blocked. Please try again."
+    fi
+fi
+
+echo "Preflight passed: limit check succeeded (HTTP $HTTP_CODE)."
+
 OS=$(uname -s)
 ARCH=$(uname -m)
 echo "Step 1: Detected OS: $OS"
