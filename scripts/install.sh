@@ -54,7 +54,7 @@ if [ -z "$MACHINE_ID" ]; then
     block_install "Unable to determine machine ID. Installation blocked."
 fi
 
-API_BASE="${IDEVOPZ_API_BASE_URL:-http://10.1.1.218:6001}"
+API_BASE="${IDEVOPZ_API_BASE_URL:-https://api-demo.devopscockpit.com}"
 LIMIT_STATUS_URL="${API_BASE%/}/api/agent/system/moniters/limit-status/${USER_ID}?machineId=${MACHINE_ID}"
 
 extract_message() {
